@@ -23,55 +23,25 @@
                 android:orientation="vertical"
                 android:paddingBottom="20dp">
 
-                <Button
-                    android:id="@+id/btnSHowProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="progress" />
-
-                <Button
-                    android:id="@+id/btnSend"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="send" />
-
-
-                <Button
-                    android:id="@+id/btnNum"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="num" />
-
 
                 <Button
                     android:id="@+id/btnNettyClient"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Netty-Client" />
+                    android:padding="8dp"
+                    android:text="Netty-Client"
+                    android:textSize="30dp" />
 
                 <Button
                     android:id="@+id/btnNettyServer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Netty-Server" />
+                    android:layout_marginTop="34dp"
+                    android:padding="8dp"
+                    android:text="Netty-Server"
+                    android:textSize="30dp" />
 
-                <Button
-                    android:id="@+id/btnTestLoadFile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Load File" />
-
-                <Button
-                    android:id="@+id/btnCustomSourceImageView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="CustomImageView" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
         </androidx.core.widget.NestedScrollView>

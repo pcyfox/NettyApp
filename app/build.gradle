@@ -3,18 +3,15 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 def isMinifyEnabled = false
-def projectName = ""
-kapt {
-    arguments {
-        arg("AROUTER_MODULE_NAME", project.getName())
-    }
-}
+def projectName = "NettyApp"
+
+def rootDependencies = rootProject.ext.dependencies
 
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {
         applicationId "com.pcyfox.common"
-        projectName = "PCommon"
+        projectName = "NettyApp"
         versionCode project.versionCode
         versionName project.versionName
 
@@ -131,24 +128,12 @@ android {
 }
 
 dependencies {
-    if (isDeveloperMode.toBoolean()) {
-        debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
-    }
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'me.jessyan:autosize:1.2.0'
-    implementation project(path: ':lib_common')
-    implementation project(path: ':lib_cache')
-    implementation project(path: ':lib_im')
-    implementation project(path: ':lib_widget')
-    implementation project(path: ':lib_utils')
-    implementation project(path: ':lib_network')
-    implementation 'com.github.pcyfox:DeskConfigManager:V1.0.2'
-    //implementation project(path: ':lib_third')
-
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
-    implementation 'me.jessyan:autosize:1.2.0'
-
     implementation 'com.google.android.material:material:1.6.1'
+    implementation project(path: ':lib_im')
+    implementation rootDependencies.xlog
 }

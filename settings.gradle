@@ -1,16 +1,11 @@
 include ':lib_im'
+
 if ("true" == getProperty("isTestMode").toString()) {
     include ':testApp'
 }
 //include 本质上也是一个函数
 include ':app',
-        ':lib_cache',
-        ':lib_common',
-        ':lib_third',
-        ':lib_utils',
-        ':lib_network',
-        ':lib_log',
-        ':lib_widget'
+        ':lib_im'
 
 
 static def execCmd(String cmd) {

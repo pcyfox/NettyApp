@@ -1,6 +1,7 @@
 package com.taike.lib_im.netty;
 
-import com.taike.lib_im.BuildConfig;
+
+import com.pcyfox.netty.BuildConfig;
 
 final public class NettyConfig {
 
@@ -18,7 +19,7 @@ final public class NettyConfig {
     public static final int MAX_FRAME_LENGTH = 1024 * 1024;  //最大长度
     public static final int START_CODE_LEN = 5;
 
-    public final static int RECONNECT_INTERVAL_TIME = 5000;
+    public final static int RECONNECT_INTERVAL_TIME = 8000;
     public static int MAX_RECONNECT_TIMES = Integer.MAX_VALUE;
 
     public static final int LENGTH_FIELD_LENGTH = 4;  //长度字段所占的字节数

@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.elvishew.xlog.XLog;
-import com.taike.lib_im.BuildConfig;
 import com.taike.lib_im.netty.MessageType;
 import com.taike.lib_im.netty.NettyConfig;
 import com.taike.lib_im.netty.NettyUtils;
@@ -16,6 +15,7 @@ import com.taike.lib_im.netty.client.status.ConnectState;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
@@ -43,8 +43,11 @@ public class NettyTcpClient {
     private volatile boolean isConnected = false;
     private volatile boolean isConnecting = false;
 
+    private volatile boolean isCalledDisconnect = false;
     private volatile boolean isAutoReconnecting = true;
+
     private ChannelFuture channelFuture = null;
+
 
     private String host;
     private int tcpPort;
@@ -54,12 +57,11 @@ public class NettyTcpClient {
     private int maxReaderIdleCount = 5;
 
     private boolean isNeedSendPing = false;
-    private boolean isNeedSendPong = false;
+    private boolean isNeedSendPong = true;
 
     private Bootstrap bootstrap;
     private final ExecutorService threadPool;
 
-    private final Object lock = new Object();
     /**
      * 最大重连次数
      */
@@ -133,16 +135,25 @@ public class NettyTcpClient {
 
     private void buildBootstrap() {
         if (bootstrap != null) {
+            bootstrap.validate();
             return;
         }
+        if (group != null) {
+            group.shutdownGracefully();
+        }
+        if (NettyConfig.isPrintLog) Log.d(TAG, "buildBootstrap() called");
         group = new NioEventLoopGroup();
         bootstrap = new Bootstrap();
+        bootstrap.remoteAddress(host, tcpPort);
         bootstrap.group(group).option(ChannelOption.TCP_NODELAY, true);//屏蔽Nagle算法
-        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
+
+        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 400).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) {
+                if (NettyConfig.isPrintLog)
+                    Log.d(TAG, "initChannel() called with: ch = [" + ch + "]");
+
                 isConnecting = false;
-                if (BuildConfig.DEBUG) Log.d(TAG, "initChannel() called with: ch = [" + ch + "]");
                 ChannelPipeline pipeline = ch.pipeline();
                 //解析报文
                 pipeline.addLast(new ProtocolDecoder(maxFrameLength));
@@ -172,27 +183,31 @@ public class NettyTcpClient {
     }
 
     private void connectServer() {
-        if (isConnected || isConnecting) {
-            return;
-        }
-        buildBootstrap();
         try {
+            buildBootstrap();
             isConnecting = true;
-            Log.d(TAG, "connectServer() called,isConnected=" + isConnected);
-            channelFuture = bootstrap.connect(host, tcpPort).addListener((ChannelFutureListener) channelFuture1 -> {
+            if (channelFuture != null) {
+                channelFuture.cancel(true);
+            }
+            if (NettyConfig.isPrintLog) Log.d(TAG, "connectServer() called");
+            channelFuture = bootstrap.connect().addListener((ChannelFutureListener) channelFuture1 -> {
                 isConnecting = false;
                 if (channelFuture1.isSuccess()) {
+                    if (NettyConfig.isPrintLog)
+                        XLog.i(TAG + ",connectServer():连接成功! ip:" + host + ",port:" + tcpPort);
                     reConnectTimes = 0;
                     isConnected = true;
-                    XLog.i(TAG + ",connectServer():连接成功! ip:" + host + ",port:" + tcpPort);
                     channel = channelFuture1.channel();
-                    if (listener != null)
+                    if (listener != null) {
                         listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_SUCCESS, mIndex);
+                    }
                 } else {
-                    XLog.w(TAG + ",connectServer():连接失败! ip:" + host + ",port:" + tcpPort);
+                    if (NettyConfig.isPrintLog)
+                        XLog.w(TAG + ",connectServer():连接失败! ip:" + host + ",port:" + tcpPort);
                     isConnected = false;
-                    if (listener != null)
+                    if (listener != null) {
                         listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_ERROR, mIndex);
+                    }
                     if (isAutoReconnecting) reconnect();
                 }
             }).sync();
@@ -205,18 +220,10 @@ public class NettyTcpClient {
             if (isAutoReconnecting) {
                 reconnect();
             } else {
-                bootstrap.validate();
-                if (null != channelFuture) {
-                    if (channelFuture.channel() != null && channelFuture.channel().isOpen()) {
-                        channelFuture.channel().close();
-                    }
-                    channelFuture.cancel(true);
-                }
-                group.shutdownGracefully();
+                shutdown();
             }
-
             if (listener != null) {
-                listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_CLOSED, mIndex);
+                listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_ERROR, mIndex);
             }
         }
     }
@@ -231,41 +238,54 @@ public class NettyTcpClient {
     }
 
     public void connect() {
-        Log.d(TAG, "connect() called");
-        synchronized (lock) {
-            if (isConnected || isConnecting) {
-                return;
-            }
-            threadPool.submit(() -> {
-                connectServer();
-            });
+        if (NettyConfig.isPrintLog)
+            Log.d(TAG, "connect() called,isConnected=" + isConnected + ",isConnecting=" + isConnecting);
+        isCalledDisconnect = false;
+        if (isConnected) {
+            return;
         }
+        threadPool.submit(this::connectServer);
     }
 
 
     public void disconnect() {
-        XLog.w(TAG, "disconnect() called!");
+        if (NettyConfig.isPrintLog) XLog.w(TAG, "disconnect() called!");
+        isCalledDisconnect = true;
         isConnected = false;
         reConnectTimes = 0;
-        if (group != null) {
-            group.shutdownGracefully();
+        if (null != channelFuture) {
+            Channel channel = channelFuture.channel();
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+            }
+            channelFuture.cancel(true);
         }
+        isConnecting = false;
+    }
+
+
+    public void shutdown() {
+        if (NettyConfig.isPrintLog) Log.d(TAG, "shutdown() called");
+        disconnect();
         if (bootstrap != null) bootstrap.validate();
+        group.shutdownGracefully();
+        bootstrap = null;
+        group = null;
     }
 
     public void reconnect() {
-        synchronized (lock) {
-            if (isConnected || isConnecting || reConnectTimes >= maxConnectTimes) {
-                return;
-            }
+        threadPool.submit(() -> {
             try {
                 Thread.sleep(reconnectIntervalTime);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            XLog.w(TAG + ":reconnect(),重新连接,第%d次", ++reConnectTimes);
+            if (isCalledDisconnect || isConnected || isConnecting || reConnectTimes >= maxConnectTimes) {
+                return;
+            }
+            XLog.w(TAG + ":reconnect(),重新连接,第%d次,maxConnectTimes=%d", ++reConnectTimes, maxConnectTimes);
             connectServer();
-        }
+        });
     }
 
 

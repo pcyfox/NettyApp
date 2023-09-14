@@ -3,7 +3,6 @@ package com.taike.lib_im.netty.server;
 import android.util.Log;
 
 import com.elvishew.xlog.XLog;
-import com.taike.lib_im.BuildConfig;
 import com.taike.lib_im.netty.MessageType;
 import com.taike.lib_im.netty.NettyConfig;
 import com.taike.lib_im.netty.NettyUtils;

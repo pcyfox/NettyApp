@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.elvishew.xlog.XLog
-import com.pcommon.lib_utils.IPUtils
 import com.taike.lib_im.netty.server.NettyServerListener
 import com.taike.lib_im.netty.server.NettyTcpServer
 import io.netty.channel.Channel
@@ -58,8 +56,8 @@ class NettyServerActivity : AppCompatActivity() {
                                 "读写空闲"
                             }
                         }
-                        XLog.d(
-                            TAG + ",ip:" + channel?.remoteAddress() + "channel:" + channel?.id()
+                        Log.d(
+                            TAG, ",ip:" + channel?.remoteAddress() + "channel:" + channel?.id()
                                 ?.asShortText() + ",isActive:" + channel?.isActive + ",超时事件：" + state
                         )
 
@@ -68,7 +66,6 @@ class NettyServerActivity : AppCompatActivity() {
             })
             start(9527)
         }
-        tvHost.text = IPUtils.getIpAddress(this) + ":9527"
     }
 
     fun onStop(view: View) {

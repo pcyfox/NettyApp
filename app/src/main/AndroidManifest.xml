@@ -16,30 +16,24 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
-        android:name="com.pcommon.application.AppApplication"
+        android:name="com.pcommon.application.App"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="${icon}"
         android:label="${app_name}"
         android:largeHeap="true"
         android:supportsRtl="true"
-        android:theme="@style/CommonAppTheme"
+        android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:label">
-        <activity
-            android:name=".TestLoadFileActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".TestWhiteBoardActivity"
-            android:exported="false" />
 
-        <meta-data
-            android:name="design_width_in_dp"
-            android:value="540" />
+        <activity android:name=".TestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".NettyServerActivity"
@@ -50,10 +44,6 @@
         </activity>
 
         <activity
-            android:name=".TestCustomSourceImageActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".NettyClientActivity"
             android:exported="false">
             <meta-data
@@ -61,24 +51,7 @@
                 android:value="" />
         </activity> <!-- 屏幕适配配置参数 -->
 
-        <activity android:name=".TestActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <receiver
-            android:name="com.pcommon.lib_common.receiver.UsbChangeReceiver"
-            android:enabled="false"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_STATE" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
