@@ -1,0 +1,17 @@
+<resources>
+
+    <style name="Stu_AppTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/base_colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/base_colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/base_colorOnPrimary</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/base_colorSecondary</item>
+        <item name="colorSecondaryVariant">@color/base_colorSecondaryVariant</item>
+        <item name="colorOnSecondary">@color/base_colorOnSecondary</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+</resources>

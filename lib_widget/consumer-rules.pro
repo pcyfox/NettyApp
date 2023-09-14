@@ -1,3 +1,0 @@
--keep class androidx.databinding.DataBindingComponent {*;}
--keep class com.pcommon.lib_vidget.**
--keep class com.pcommon.lib_vidget.exam.**{*;}
